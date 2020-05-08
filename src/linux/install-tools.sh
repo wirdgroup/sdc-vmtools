@@ -15,10 +15,10 @@ print_prompt() {
   echo "--------------------------------------------------------------------"
   echo " SmartOS VM Guest Tools - Install (Linux)"
   echo "--------------------------------------------------------------------"
-  echo  
+  echo
   echo "This script will install startup tools for SmartOS virtual machine"
   echo "guests. This includes an rc.local script which will be used to set"
-  echo "root administrator ssh keys, as well as tools to automatically" 
+  echo "root administrator ssh keys, as well as tools to automatically"
   echo "format secondary disks, and other generic tools."
   echo "Tools will be located in /lib/smartdc, but will not be included in"
   echo "your \$PATH environment variable automatically."
@@ -28,7 +28,7 @@ print_prompt() {
   echo "e.g. $0 -y"
   echo
   echo
-  
+
   yn=
   while [[ $yn == "" ]]; do
     read -p "Do you want to continue? (Y/N): " yn
@@ -58,6 +58,8 @@ install_tools() {
     mv /etc/rc.local /etc/rc.local-backup
   fi
   ln -fs /lib/smartdc/joyent_rc.local /etc/rc.local
+  cp -a /systemd/joyent_rc.local.service /usr/lib/systemd/system/joyent_rc.local.service
+  systemctl enable joyent_rc.local.service
 }
 
 install_debian() {
@@ -72,7 +74,7 @@ install_redhat() {
   echo "Installing redhat-flavour specific files..."
   # Install packages required for guest tools
   yum install -y -q parted
-  
+
   # On CentOS 7 systemd is the default.
   # make /etc/rc.d/rc.local executable to enable rc.local Compatibility unit
   ln -fs /lib/smartdc/joyent_rc.local /etc/rc.d/rc.local
@@ -145,6 +147,6 @@ else
   fi
 fi
 
-echo 
+echo
 echo "All done!"
-echo 
+echo

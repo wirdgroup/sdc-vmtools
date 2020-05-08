@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2020, Cortex-IT, SA All rights reserved.
+#
+# Joyent specific scripts that are ran on each boot
+#
+
+# load common functions and vars
+. /lib/smartdc/lib_smartdc_scripts.cfg
+
+# Set Variable Network
+ips=$($MDATA_GET_BIN sdc:nics | grep -Po '"ips":.*?[^[]"' | awk -F : '{print  $2}' | tr -d '["')
+ip=$($MDATA_GET_BIN sdc:nics | grep -Po '"ip":.*?[^\\]"' | awk -F : '{print  $2}' | tr -d '"')
+gateway=$($MDATA_GET_BIN sdc:nics | grep -Po '"gateway":.*?[^\\]"' | awk -F : '{print  $2}' | tr -d '"')
+netmask=$($MDATA_GET_BIN sdc:nics | grep -Po '"netmask":.*?[^\\]"' | awk -F : '{print  $2}' | tr -d '"')
+interface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " ")
+ninterface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " " |  tr -d 'eth')
+dns1=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
+dns2=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
+os=$(cat /etc/os-release | grep ID_LIKE | tr '="' " " | awk  '{print  $2}')
+
+#SUSE & openSUSE
+if [ $os = "suse" ]; then
+  if [ ! -f "/etc/sysconfig/network/ifcfg-$interface" ]; then
+    #Set interface
+    echo "BOOTPROTO='static'" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "BROADCAST=''" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "ETHTOOL_OPTIONS=''" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "IPADDR='$ips'" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "MTU=''" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "NAME='Ethernet Card $ninterface'" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "NETWORK=''" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "REMOTE_IPADDR=''" >> /etc/sysconfig/network/ifcfg-$interface
+    echo "STARTMODE='auto'" >> /etc/sysconfig/network/ifcfg-$interface
+
+    # Set route
+    echo "default $gateway - -" >> /etc/sysconfig/network/routes
+  fi
+fi
+
+#Set Resolvers
+sed -i -e 's/NETCONFIG_DNS_STATIC_SERVERS=""/NETCONFIG_DNS_STATIC_SERVERS="$dns1 $dns2"/g' /etc/sysconfig/network/config
+
+#Restart Service Network
+systemctl restart network.service

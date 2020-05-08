@@ -23,12 +23,12 @@ if [[ -f /etc/hostname && -s /etc/hostname ]]; then
       exit 0
    else
       lib_smartdc_info "/etc/hostname does not have a valid hostname"
-   fi 
+   fi
 fi
 
-mdata_hostname=$($MDATA_GET_BIN "hostname" 2>>/dev/console)
+mdata_hostname=$($MDATA_GET_BIN "sdc:alias" 2>>/dev/console)
 
-if [[ $? -eq 0 && ! -z "$mdata_hostname" ]]; then  
+if [[ $? -eq 0 && ! -z "$mdata_hostname" ]]; then
    lib_smartdc_info "Metadata hostname set to $mdata_hostname"
    lib_smartdc_info "Setting hostname to $mdata_hostname"
    hostname "$mdata_hostname"

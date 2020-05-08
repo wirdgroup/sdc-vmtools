@@ -10,7 +10,7 @@ lib_smartdc_info "Start of $(basename $0) script"
 
 # Set Network for VM brand Bhyve
 if [ $($MDATA_GET_BIN sdc:brand) = "bhyve" ]; then
-  (/lib/smartdc/set-networking)
+  (/lib/smartdc/set-network)
 fi
 
 # Set root password if root_pw is set in the image manifest

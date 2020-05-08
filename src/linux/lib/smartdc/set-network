@@ -17,10 +17,9 @@ interface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " ")
 ninterface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " " |  tr -d 'eth')
 dns1=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
 dns2=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
-os=$(cat /etc/os-release | grep ID_LIKE | tr '="' " " | awk  '{print  $2}')
 
 #SUSE & openSUSE
-if [ $os = "suse" ]; then
+if [ $OS = "suse" ]; then
   if [ ! -f "/etc/sysconfig/network/ifcfg-$interface" ]; then
     #Set interface
     echo "BOOTPROTO='static'" >> /etc/sysconfig/network/ifcfg-$interface

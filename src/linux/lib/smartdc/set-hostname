@@ -31,7 +31,13 @@ mdata_hostname=$($MDATA_GET_BIN "sdc:alias" 2>>/dev/console)
 if [[ $? -eq 0 && ! -z "$mdata_hostname" ]]; then
    lib_smartdc_info "Metadata hostname set to $mdata_hostname"
    lib_smartdc_info "Setting hostname to $mdata_hostname"
-   hostname "$mdata_hostname"
+
+   #SUSE & openSUSE
+   if [ $OS = "suse" ]; then
+     hostnamectl set-hostname "$mdata_hostname"
+   else
+     hostname "$mdata_hostname"
+   fi
 fi
 
 exit 0

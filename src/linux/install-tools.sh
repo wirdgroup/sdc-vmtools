@@ -58,7 +58,7 @@ install_tools() {
     mv /etc/rc.local /etc/rc.local-backup
   fi
   ln -fs /lib/smartdc/joyent_rc.local /etc/rc.local
-  cp -a /systemd/joyent_rc.local.service /usr/lib/systemd/system/joyent_rc.local.service
+  cp -a ./systemd/joyent_rc.local.service /usr/lib/systemd/system/joyent_rc.local.service
   systemctl enable joyent_rc.local.service
 }
 

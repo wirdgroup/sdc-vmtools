@@ -6,13 +6,10 @@
 # load common functions and vars
 . /lib/smartdc/lib_smartdc_scripts.cfg
 
-#Set Variable
-brand=$($MDATA_GET_BIN sdc:brand)
-
 lib_smartdc_info "Start of $(basename $0) script"
 
 # Set Network for VM brand Bhyve
-if [ $brand = "bhyve" ]; then
+if [ $($MDATA_GET_BIN sdc:brand) = "bhyve" ]; then
   (/lib/smartdc/set-networking)
 fi
 

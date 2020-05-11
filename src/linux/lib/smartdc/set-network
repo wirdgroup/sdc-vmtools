@@ -18,8 +18,8 @@ ninterface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " " |  tr -d 'eth')
 dns1=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
 dns2=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
 
-#SUSE & openSUSE
-if [ $OS = "suse" ]; then
+# openSUSE
+if [ $OS = "openSUSE" ]; then
   if [ ! -f "/etc/sysconfig/network/ifcfg-$interface" ]; then
     #Set interface
     echo "BOOTPROTO='static'" >> /etc/sysconfig/network/ifcfg-$interface
@@ -34,11 +34,25 @@ if [ $OS = "suse" ]; then
 
     # Set route
     echo "default $gateway - -" >> /etc/sysconfig/network/routes
+
+    #Set Resolvers
+    sed -i -e 's/NETCONFIG_DNS_STATIC_SERVERS=""/NETCONFIG_DNS_STATIC_SERVERS="$dns1 $dns2"/g' /etc/sysconfig/network/config
+
+    #Restart Service Network
+    systemctl restart network.service
   fi
+
+# Debian
+elif [ $OS = "Debian" ]; then
+  #Set interface
+  echo "" >> /etc/network/interfaces
+  echo "auto $interface" >> /etc/network/interfaces
+  echo "allow-hotplug $interface" >> /etc/network/interfaces
+  echo "iface $interface inet static" >> /etc/network/interfaces
+  echo "address $ips" >> /etc/network/interfaces
+  echo "gateway $gateway" >> /etc/network/interfaces
+  echo "dns-nameservers $dns1 $dns2"
+
+  #Restart Service Network
+  systemctl restart networking.service
 fi
-
-#Set Resolvers
-sed -i -e 's/NETCONFIG_DNS_STATIC_SERVERS=""/NETCONFIG_DNS_STATIC_SERVERS="$dns1 $dns2"/g' /etc/sysconfig/network/config
-
-#Restart Service Network
-systemctl restart network.service

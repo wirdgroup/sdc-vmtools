@@ -57,9 +57,6 @@ install_tools() {
   if [[ -e /etc/rc.local ]]; then
     mv /etc/rc.local /etc/rc.local-backup
   fi
-  ln -fs /lib/smartdc/joyent_rc.local /etc/rc.local
-  cp -a ./systemd/joyent_rc.local.service /usr/lib/systemd/system/joyent_rc.local.service
-  systemctl enable joyent_rc.local.service
 }
 
 install_debian() {
@@ -67,6 +64,7 @@ install_debian() {
   echo "Installing debian-flavour specific files..."
   # Install packages required for guest tools
   apt-get install -y -q parted
+  ln -fs /lib/smartdc/joyent_rc.local /etc/rc.local
 }
 
 install_redhat() {
@@ -88,9 +86,9 @@ install_suse() {
     zypper -q install -y parted
 
     # On SUSE systemd is the default.
-    # make /etc/rc.d/rc.local executable to enable rc.local Compatibility unit
-    ln -fs /lib/smartdc/joyent_rc.local /etc/rc.d/rc.local
-    chmod 755 /etc/rc.d/rc.local
+    # make /etc/rc.d/joyent_rc.local executable to enable joyent_rc.local Compatibility unit
+    cp -a ./systemd/joyent_rc.local.service /usr/lib/systemd/system/joyent_rc.local.service
+    systemctl enable joyent_rc.local.service
 }
 
 if [[ $EUID -ne 0 ]] ; then

@@ -13,8 +13,8 @@ ips=$($MDATA_GET_BIN sdc:nics | grep -Po '"ips":.*?[^[]"' | awk -F : '{print  $2
 ip=$($MDATA_GET_BIN sdc:nics | grep -Po '"ip":.*?[^\\]"' | awk -F : '{print  $2}' | tr -d '"')
 gateway=$($MDATA_GET_BIN sdc:nics | grep -Po '"gateway":.*?[^\\]"' | awk -F : '{print  $2}' | tr -d '"')
 netmask=$($MDATA_GET_BIN sdc:nics | grep -Po '"netmask":.*?[^\\]"' | awk -F : '{print  $2}' | tr -d '"')
-interface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " ")
-ninterface=$(ip a | awk '{print $2}' | grep ^eth | tr ":" " " |  tr -d 'eth')
+interface=$(ip a | awk '{print $2}' | grep '^eth\|^enp' | tr ":" " ")
+ninterface=$(ip a | awk '{print $2}' | grep '^eth\|^enp' | tr ":" " " |  tr -d 'eth\|enp')
 dns1=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
 dns2=$($MDATA_GET_BIN sdc:resolvers | tr ',' ' ' | tr -d '[""]' | awk  '{print  $1}')
 
@@ -44,6 +44,9 @@ if [ $OS = "openSUSE" ]; then
 
 # Debian
 elif [ $OS = "Debian" ]; then
+  #Down interface
+  ifdown $interface
+
   #Set interface
   echo "" >> /etc/network/interfaces
   echo "auto $interface" >> /etc/network/interfaces
@@ -51,8 +54,11 @@ elif [ $OS = "Debian" ]; then
   echo "iface $interface inet static" >> /etc/network/interfaces
   echo "address $ips" >> /etc/network/interfaces
   echo "gateway $gateway" >> /etc/network/interfaces
-  echo "dns-nameservers $dns1 $dns2"
-
+  echo "dns-nameservers $dns1 $dns2" >> /etc/network/interfaces
+  
   #Restart Service Network
   systemctl restart networking.service
+
+  #UP interface
+  ifup $interface
 fi

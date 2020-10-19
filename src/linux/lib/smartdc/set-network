@@ -55,10 +55,30 @@ elif [ $OS = "Debian" ]; then
   echo "address $ips" >> /etc/network/interfaces
   echo "gateway $gateway" >> /etc/network/interfaces
   echo "dns-nameservers $dns1 $dns2" >> /etc/network/interfaces
-  
+
   #Restart Service Network
   systemctl restart networking.service
 
   #UP interface
   ifup $interface
-fi
+
+  # Ubuntu
+  elif [ $OS = "Ubuntu" ]; then
+
+    #Set interface
+    echo "network:" >> /etc/netplan/00-installer-config.yaml
+    echo "  ethernets:" >> /etc/netplan/00-installer-config.yaml
+    echo "    $interface:" >> /etc/netplan/00-installer-config.yaml
+    echo "      addresses:" >> /etc/netplan/00-installer-config.yaml
+    echo "      - $ips" >> /etc/netplan/00-installer-config.yaml
+    echo "      gateway4: $gateway" >> /etc/netplan/00-installer-config.yaml
+    echo "      nameservers:" >> /etc/netplan/00-installer-config.yaml
+    echo "        addresses:"  >> /etc/netplan/00-installer-config.yaml
+    echo "        - $dns1"  >> /etc/netplan/00-installer-config.yaml
+    echo "        - $dns2"  >> /etc/netplan/00-installer-config.yaml
+    echo "  version: 2" >> /etc/netplan/00-installer-config.yaml
+
+    # Apply Configuration
+    netplan apply
+
+  fi
